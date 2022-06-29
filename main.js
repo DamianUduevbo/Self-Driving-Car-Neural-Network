@@ -24,8 +24,8 @@ const otherCarData1 = {
 
 const traffic = [
     new Car(road.getLaneCentre(1), 100, 30, 50, "red", otherCarData, "AI"),
-    //new Car(road.getLaneCentre(1), 50, 30, 50, "blue", otherCarData1, "AI"),
-    //new Car(road.getLaneCentre(1), 200, 30, 50, "yellow", otherCarData1, "AI")
+    new Car(road.getLaneCentre(1), 50, 30, 50, "blue", otherCarData1, "AI"),
+    new Car(road.getLaneCentre(1), 200, 30, 50, "yellow", otherCarData1, "AI")
 ]
 
 //car.draw(ctx)

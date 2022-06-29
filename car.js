@@ -6,6 +6,7 @@ const defaultDriveData = {
     angle: 0
 }
 
+
 class Car {
     constructor(x, y, width, height, colour, driveData = {...defaultDriveData}, pilot = "USER") {
         this.x = x
@@ -87,7 +88,7 @@ class Car {
                 return true
             }
         }
-        
+
         return false
     }
 
