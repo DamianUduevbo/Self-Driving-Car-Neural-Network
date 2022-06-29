@@ -1,28 +1,37 @@
+const defaultDriveData = {
+    speed: 0,
+    maxSpeed: 8,
+    accl: 0.2,
+    friction: 0.05,
+    angle: 0
+}
+
 class Car {
-    constructor(x, y, width, height) {
+    constructor(x, y, width, height, colour, driveData = {...defaultDriveData}, pilot = "USER") {
         this.x = x
         this.y = y
         this.width = width
         this.height = height
 
-        this.speed = 0
-        this.acceleration = 0.2
-        this.maxSpeed = 3
-        this.friction = 0.05
-        this.angle = 0
+        this.colour = colour
+
+        this.speed = driveData.speed
+        this.acceleration = driveData.accl
+        this.maxSpeed = driveData.maxSpeed
+        this.friction = driveData.friction
+        this.angle = driveData.angle
         
         this.damaged = false
 
         this.sensor = new Sensor(this)
-        this.controls = new Controls()
+        this.controls = new Controls(pilot)
     }
 
-
-    update(roadBorders) {
+    update(roadBorders, traffic) {
         this.#move()
         this.polygon = this.#createPolygon()
-        this.damaged = this.#assesDamage(roadBorders)
-        this.sensor.update(roadBorders)
+        this.damaged = this.#assesDamage(roadBorders, traffic)
+        this.sensor.update(roadBorders, traffic)
     }
 
     #move() {
@@ -66,12 +75,19 @@ class Car {
         this.y -= Math.cos(this.angle) * this.speed
     }
 
-    #assesDamage(roadBorders) {
+    #assesDamage(roadBorders, traffic) {
         for (let i = 0; i < roadBorders.length; i++) {
             if (polysIntersect(this.polygon, roadBorders[i])) {
                 return true
             }
         }
+
+        for (let i = 0; i < traffic.length; i++) {
+            if (polysIntersect(this.polygon, traffic[i].polygon)) {
+                return true
+            }
+        }
+        
         return false
     }
 
@@ -113,7 +129,7 @@ class Car {
             this.maxSpeed = 0
         }
         else {
-            ctx.fillStyle = "black"
+            ctx.fillStyle = this.colour
         }
         context.beginPath();
 
@@ -124,21 +140,6 @@ class Car {
         }
 
         context.fill()
-        /*
-        context.save()
-        context.translate(this.x, this.y)
-        context.rotate(-this.angle)
-
-        context.beginPath();
-        context.rect(
-            - this.width / 2,
-            - this.height / 2,
-            this.width,
-            this.height
-        );
-        context.fill();
-        context.restore()
-        */
 
         this.sensor.draw(context)
     }
