@@ -3,7 +3,7 @@ class Sensor {
     constructor(car) {
         this.car = car
 
-        this.rayCount = 90
+        this.rayCount = 180
         this.rayLength = 150
         this.raySpread = Math.PI/2
         const rays = []

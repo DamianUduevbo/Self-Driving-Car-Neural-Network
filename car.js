@@ -3,12 +3,13 @@ const defaultDriveData = {
     maxSpeed: 8,
     accl: 0.2,
     friction: 0.05,
-    angle: 0
+    angle: 0,
+    pilot: "AI"
 }
 
 
 class Car {
-    constructor(x, y, width, height, colour, driveData = {...defaultDriveData}, pilot = "USER") {
+    constructor(x, y, width, height, colour, driveData = {...defaultDriveData}) {
         this.x = x
         this.y = y
         this.width = width
@@ -24,15 +25,46 @@ class Car {
         
         this.damaged = false
 
-        this.sensor = new Sensor(this)
-        this.controls = new Controls(pilot)
+        this.useBrain = driveData.pilot=="AI"
+
+        if (driveData.pilot.toLowerCase() != "npc") {
+            this.sensor = new Sensor(this)
+            this.brain = new NeuralNetwork([this.sensor.rayCount, 6, 4])
+        }
+        /* my guess implementation
+        + First level this.sensor.rayCount is the number of rays coming from the car
+        + Second level this.sensor.readings.length is the number of readings coming from the car's sensor
+        RESULT: incorrect implementation
+        this.brain = new NeuralNetwork([this.sensor.rayCount, this.sensor.readings.length])
+        */
+        this.controls = new Controls(driveData.pilot)
     }
 
     update(roadBorders, traffic) {
-        this.#move()
-        this.polygon = this.#createPolygon()
-        this.damaged = this.#assesDamage(roadBorders, traffic)
-        this.sensor.update(roadBorders, traffic)
+        if (!this.damaged) {
+            this.#move()
+            this.polygon = this.#createPolygon()
+            this.damaged = this.#assesDamage(roadBorders, traffic)
+        }
+        if (this.sensor) {
+            this.sensor.update(roadBorders, traffic)
+            /*
+            const offsets = this.sensor.readings.map(v => {
+                v == null ? 0 : 1 - 0;
+                console.log(v)
+            })
+            */
+            const offsets = this.sensor.readings.map(v => v == null ? 0 : 1 - v.offset)
+            const outputs = NeuralNetwork.feedForward(offsets, this.brain)
+            console.log(outputs)
+
+            if (this.useBrain) {
+                this.controls.forward = outputs[0]
+                this.controls.left = outputs[1]
+                this.controls.right = outputs[2]
+                this.controls.back = outputs[3]
+            }
+        }
     }
 
     #move() {
@@ -142,6 +174,8 @@ class Car {
 
         context.fill()
 
-        this.sensor.draw(context)
+        if (this.sensor) {
+            this.sensor.draw(context)
+        }
     }
 }

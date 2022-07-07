@@ -1,21 +1,36 @@
 class Controls {
-    constructor(controlType = "USER") {
+    constructor(controlType) {
         this.forward = false
         this.back = false
         this.left = false
         this.right = false
 
+        /*
+        if (controlType != "NPC") {
+            this.#addKeyBoardListeners()
+        }
+        else {
+            this.forward = true
+        }
+        */
+
+        /*
+        */
         switch(controlType.toLowerCase()) {
             case "user":
                 this.#addKeyBoardListeners()
                 break
-            case "ai":
+            case "npc":
                 this.forward = true
+                break
+            case "ai":
+                //this.#addKeyBoardListeners()
                 break
             default:
                 this.forward = true
                 break
         }
+        console.log("ENGSN:" + controlType.toLowerCase())
         
     }
 

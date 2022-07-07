@@ -1,9 +1,23 @@
-const canvas = document.getElementById("myCanvas")
-
+const canvas = document.getElementById("carCanvas")
 canvas.width = 200
 
+const networkCanvas = document.getElementById("networkCanvas")
+networkCanvas.width = 300
+
 const ctx = canvas.getContext("2d")
+const networkCtx = networkCanvas.getContext("2d")
+
 const road = new Road(canvas.width / 2, canvas.width * 0.9)
+
+const mainCarData = {
+    speed: 0,
+    maxSpeed: 3,
+    accl: 0.2,
+    friction: 0.05,
+    angle: 0,
+    pilot: "AI"
+}
+
 const car = new Car(road.getLaneCentre(0), 100, 30, 50, "black")
 
 const otherCarData = {
@@ -11,7 +25,8 @@ const otherCarData = {
     maxSpeed: 3,
     accl: 0.2,
     friction: 0.05,
-    angle: 0
+    angle: 0,
+    pilot: "NPC"
 }
 
 const otherCarData1 = {
@@ -19,13 +34,14 @@ const otherCarData1 = {
     maxSpeed: 2,
     accl: 0.2,
     friction: 0.05,
-    angle: 0
+    angle: 0,
+    pilot: "NPC"
 }
 
 const traffic = [
-    new Car(road.getLaneCentre(1), 100, 30, 50, "red", otherCarData, "AI"),
-    new Car(road.getLaneCentre(1), 50, 30, 50, "blue", otherCarData1, "AI"),
-    new Car(road.getLaneCentre(1), 200, 30, 50, "yellow", otherCarData1, "AI")
+    //new Car(road.getLaneCentre(1), 100, 30, 50, "red", otherCarData),
+    new Car(road.getLaneCentre(0), 10, 30, 50, "blue", otherCarData1),
+    //new Car(road.getLaneCentre(1), 200, 30, 50, "yellow", otherCarData1)
 ]
 
 //car.draw(ctx)
@@ -43,11 +59,14 @@ function filterdTraffic(Car) {
 function animate() {
     for (let i = 0; i < traffic.length; i++) {
         traffic[i].update(road.borders, [])
-        traffic[i].sensor.setVisibility(false)
+        if (traffic[i].sensor) {
+            traffic[i].sensor.setVisibility(false)
+        }
     }
 
     car.update(road.borders, traffic)
     canvas.height = window.innerHeight
+    networkCanvas.height = window.innerHeight
 
     ctx.save()
     ctx.translate(0, -car.y + canvas.height * 0.8)
@@ -60,8 +79,9 @@ function animate() {
 
     car.draw(ctx)
 
-
     ctx.restore()
+
+    Visualizer.drawNetwork(networkCtx, car.brain)
     requestAnimationFrame(animate)
 }
 
